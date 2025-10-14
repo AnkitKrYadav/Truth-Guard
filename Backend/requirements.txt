@@ -1,0 +1,6 @@
+flask 
+streamlit 
+langchain 
+openai 
+requests 
+python-dotenv
