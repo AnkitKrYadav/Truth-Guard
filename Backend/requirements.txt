@@ -1,6 +1,8 @@
-flask 
-streamlit 
-langchain 
-openai 
-requests 
+flask
+flask-cors
+requests
+langchain
+openai
 python-dotenv
+pymongo
+newsapi-python
