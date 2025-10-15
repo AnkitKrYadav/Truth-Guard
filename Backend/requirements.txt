@@ -6,3 +6,4 @@ openai
 python-dotenv
 pymongo
 newsapi-python
+sqlite3
