@@ -1,61 +1,33 @@
 import React, { useState } from "react";
-import { FiCheckCircle } from "react-icons/fi";
+import { Search } from "lucide-react";
 
-const InputSection = ({ onVerify, loading }) => {
-  const [text, setText] = useState("");
+function InputSection() {
+  const [query, setQuery] = useState("");
 
   const handleVerify = () => {
-    const claim = text.trim();
-    if (!claim) return;
-    onVerify(claim);
-    setText("");
-  };
-
-  const handleKey = (e) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-      handleVerify();
-    }
+    if (!query.trim()) return;
+    alert(`Verifying: ${query}`);
+    // TODO: connect backend (fetch('/api/verify_news', { method: 'POST', ... }))
   };
 
   return (
-    <section className="input-section" id="demo" aria-label="Verify a claim">
-      <div className="input-inner container">
-        <label htmlFor="claim" className="label">
-          Paste a claim or news excerpt to verify
-        </label>
-        <textarea
-          id="claim"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKey}
-          rows="4"
-          placeholder="Example: 'XYZ vaccine causes infertility' — paste text or a short paragraph here"
-          className="textarea"
-          aria-label="Claim input"
-        />
-        <div className="actions">
-          <button
-            className="btn primary"
-            onClick={handleVerify}
-            disabled={loading}
-            aria-pressed="false"
-          >
-            {loading ? "Verifying…" : (<><FiCheckCircle /> Verify</>)}
-          </button>
-          <button
-            className="btn ghost"
-            onClick={() => setText("")}
-            aria-label="Clear input"
-          >
-            Clear
-          </button>
-        </div>
-        <small className="hint">
-          Tip: Press <kbd>Ctrl/⌘ + Enter</kbd> to verify quickly.
-        </small>
-      </div>
-    </section>
+    <div className="bg-white p-6 rounded-2xl shadow-md flex items-center gap-3">
+      <Search className="w-6 h-6 text-gray-500" />
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Paste a news headline, link, or claim..."
+        className="flex-grow focus:outline-none bg-transparent text-gray-800 placeholder-gray-500"
+      />
+      <button
+        onClick={handleVerify}
+        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition"
+      >
+        Verify
+      </button>
+    </div>
   );
-};
+}
 
 export default InputSection;

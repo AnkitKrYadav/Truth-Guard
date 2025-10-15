@@ -1,26 +1,22 @@
 import React from "react";
-import { AiOutlineSafetyCertificate } from "react-icons/ai";
+import { ShieldCheck } from "lucide-react";
 
-const Header = () => {
+function Header() {
   return (
-    <header className="site-header" role="banner">
-      <div className="site-header-inner container">
-        <div className="brand">
-          <AiOutlineSafetyCertificate className="brand-icon" />
-          <div>
-            <h1 className="brand-title">TruthGuard</h1>
-            <p className="brand-sub">Your AI Shield Against Digital Deception</p>
-          </div>
+    <header className="bg-white/70 backdrop-blur-md shadow-sm sticky top-0 z-50">
+      <div className="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-7 h-7 text-blue-600" />
+          <h1 className="text-2xl font-bold text-gray-800">TruthGuard</h1>
         </div>
-
-        <nav className="main-nav" aria-label="Main navigation">
-          <a href="#how" className="nav-link">How it works</a>
-          <a href="#demo" className="nav-link">Demo</a>
-          <a href="#team" className="nav-link">Team</a>
+        <nav className="hidden md:flex gap-6 text-gray-600 font-medium">
+          <a href="#" className="hover:text-blue-600">Home</a>
+          <a href="#" className="hover:text-blue-600">About</a>
+          <a href="#" className="hover:text-blue-600">Contact</a>
         </nav>
       </div>
     </header>
   );
-};
+}
 
 export default Header;

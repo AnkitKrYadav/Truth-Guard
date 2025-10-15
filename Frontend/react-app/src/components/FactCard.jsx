@@ -1,47 +1,34 @@
 import React from "react";
-import { AiOutlineLink } from "react-icons/ai";
+import { BadgeCheck, AlertTriangle } from "lucide-react";
 
-const statusColor = (status) => {
-  if (!status) return "#999";
-  const s = status.toLowerCase();
-  if (s.includes("true") || s.includes("true")) return "#137f24"; // green
-  if (s.includes("doubt") || s.includes("partially") || s.includes("mixed")) return "#b08900"; // yellow
-  return "#be2b2b"; // red
-};
-
-const FactCard = ({ fact }) => {
-  const color = statusColor(fact.status);
+function FactCard({ title, source, confidence, verdict, description }) {
+  const isTrue = verdict.toLowerCase().includes("true");
 
   return (
-    <article className="fact-card" role="article" aria-live="polite">
-      <div className="fact-head" style={{ borderLeft: `6px solid ${color}` }}>
-        <div className="fact-title">{fact.title}</div>
-        <div className="fact-meta">
-          <span className="status" style={{ color }}>{fact.status} • {fact.confidence}%</span>
-          <time className="time">{new Date(fact.timestamp).toLocaleString()}</time>
-        </div>
-      </div>
-
-      <div className="fact-body">
-        <p className="summary">{fact.summary}</p>
-        {fact.sources && fact.sources.length > 0 && (
-          <div className="sources">
-            <strong>Sources:</strong>
-            <ul>
-              {fact.sources.map((s, i) => (
-                <li key={i}><AiOutlineLink /> {s}</li>
-              ))}
-            </ul>
-          </div>
+    <div className="bg-white rounded-2xl shadow-md p-6 border-l-4 hover:shadow-lg transition-all duration-200"
+      style={{ borderColor: isTrue ? "#16a34a" : "#dc2626" }}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-semibold">{title}</h3>
+        {isTrue ? (
+          <BadgeCheck className="text-green-600 w-6 h-6" />
+        ) : (
+          <AlertTriangle className="text-red-600 w-6 h-6" />
         )}
       </div>
-
-      <div className="fact-actions">
-        <button className="btn small">Agree</button>
-        <button className="btn small ghost">Report</button>
+      <p className="mt-2 text-gray-600">{description}</p>
+      <div className="mt-3 text-sm text-gray-500 flex justify-between">
+        <span>Source: {source}</span>
+        <span>Confidence: {confidence}</span>
+        <span
+          className={`font-semibold ${
+            isTrue ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {verdict}
+        </span>
       </div>
-    </article>
+    </div>
   );
-};
+}
 
 export default FactCard;
