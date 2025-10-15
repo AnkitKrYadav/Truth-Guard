@@ -1,6 +1,3 @@
-Sure! Here’s a professional and complete **README.md** tailored for your **Truth-Guard** project that you can directly use for GitHub:
-
-````markdown
 # Truth-Guard
 
 Truth-Guard is a web application that provides real-time trending news and fact-checked claims. Built with a modern React frontend and a Flask backend, it integrates a SQLite database to store news articles and categories. The platform allows users to explore trending topics, filter by categories, and view key statistics at a glance.
@@ -165,11 +162,4 @@ MIT License © 2025
 Uday
 Engineering Student & Developer
 
-```
-
----
-
-If you want, I can also **add a “Quick Start” section with one command** to run both frontend and backend simultaneously for development. This is handy before deployment.  
-
-Do you want me to add that?
 ```
