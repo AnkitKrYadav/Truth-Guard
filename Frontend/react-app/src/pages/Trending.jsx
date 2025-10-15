@@ -12,10 +12,10 @@ const Trending = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const newsRes = await axios.get("/api/trending");
+        const newsRes = await axios.get("https://truth-guard-89p9.onrender.com/api/trending");
         setTrendingNews(newsRes.data);
 
-        const catRes = await axios.get("/api/categories");
+        const catRes = await axios.get("https://truth-guard-89p9.onrender.com/api/categories");
         setCategories(catRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);

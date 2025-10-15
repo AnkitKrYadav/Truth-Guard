@@ -12,7 +12,7 @@ const Dashboard = () => {
     async function fetchData() {
       try {
         // Fetch news
-        const resNews = await axios.get("/api/trending");
+        const resNews = await axios.get("https://truth-guard-89p9.onrender.com/api/trending");
         setTrendingNews(resNews.data);
 
         // Build stats with real numbers
