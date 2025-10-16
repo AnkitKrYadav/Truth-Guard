@@ -1,13 +1,29 @@
+# Flask & Server
 flask==2.2.5
 flask-cors==3.0.10
-requests==2.31.0
 python-dotenv==1.0.0
+
+# HTTP Requests & APIs
+requests==2.31.0
+newsapi-python==0.2.7
+
+# Database
+pymongo==4.6.1
+
+# AI & NLP
 openai==1.8.5
-flask
-flask-cors
-requests
-langchain
-openai
-python-dotenv
-pymongo
-newsapi-python
+langchain==0.2.11
+
+# Utilities & Logging
+tqdm==4.66.1
+rich==13.7.0
+tenacity==8.2.3
+
+# Testing (optional but recommended)
+pytest==8.1.1
+
+# For JSON & Data Processing
+ujson==5.9.0
+
+# If you ever integrate async features later:
+aiohttp==3.9.5
