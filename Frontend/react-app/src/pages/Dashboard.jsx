@@ -20,7 +20,7 @@ const Dashboard = () => {
           { title: "Verified Claims", value: resNews.data.length, icon: "✅", bgColor: "bg-green-100" },
           { title: "Trending Today", value: resNews.data.length, icon: "🔥", bgColor: "bg-red-100" },
           { title: "New Users", value: 10, icon: "👤", bgColor: "bg-blue-100" }, // placeholder
-          { title: "Fact Checks Completed", value: 180          git add Frontend/react-app/src/pages/Dashboard.jsx && git commit -m "Update Dashboard.jsx" && git push, icon: "📊", bgColor: "bg-yellow-100" } // placeholder
+          { title: "Fact Checks Completed", value: 180, icon: "📊", bgColor: "bg-yellow-100" } // placeholder
         ];
         setStats(statsData);
 
