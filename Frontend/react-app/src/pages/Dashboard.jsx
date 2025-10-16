@@ -19,8 +19,8 @@ const Dashboard = () => {
         const statsData = [
           { title: "Verified Claims", value: resNews.data.length, icon: "✅", bgColor: "bg-green-100" },
           { title: "Trending Today", value: resNews.data.length, icon: "🔥", bgColor: "bg-red-100" },
-          { title: "New Users", value: 320, icon: "👤", bgColor: "bg-blue-100" }, // placeholder
-          { title: "Fact Checks Completed", value: 980, icon: "📊", bgColor: "bg-yellow-100" } // placeholder
+          { title: "New Users", value: 10, icon: "👤", bgColor: "bg-blue-100" }, // placeholder
+          { title: "Fact Checks Completed", value: 180, icon: "📊", bgColor: "bg-yellow-100" } // placeholder
         ];
         setStats(statsData);
 
