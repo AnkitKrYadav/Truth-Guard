@@ -11,7 +11,7 @@ newsapi-python==0.2.7
 pymongo==4.6.1
 
 # AI & NLP
-openai==1.8.5
+openai==1.53.0
 langchain==0.2.11
 
 # Utilities & Logging
@@ -19,11 +19,11 @@ tqdm==4.66.1
 rich==13.7.0
 tenacity==8.2.3
 
-# Testing (optional but recommended)
+# Testing (optional)
 pytest==8.1.1
 
-# For JSON & Data Processing
+# JSON & Data
 ujson==5.9.0
 
-# If you ever integrate async features later:
+# Async Support
 aiohttp==3.9.5
