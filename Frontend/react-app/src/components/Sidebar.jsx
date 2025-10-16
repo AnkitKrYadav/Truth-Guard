@@ -20,8 +20,8 @@ const links = [
 
 function Sidebar() {
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white border-r shadow-sm">
-      <div className="p-5 border-b">
+    <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 shadow-sm text-gray-900 dark:text-gray-100">
+      <div className="p-5 border-b dark:border-gray-700">
         <h2 className="text-2xl font-bold text-blue-600">TruthGuard</h2>
       </div>
       <nav className="flex-grow px-4 py-6 space-y-2">

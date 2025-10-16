@@ -10,7 +10,7 @@ const NewsCard = ({ title, source, summary, category }) => {
   };
 
   return (
-    <div className="border rounded-lg p-4 shadow hover:shadow-lg transition">
+    <div className="border rounded-lg p-4 shadow hover:shadow-lg transition bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
       {category && (
         <span
           className={`inline-block px-2 py-1 text-xs font-semibold rounded-full mb-2 ${

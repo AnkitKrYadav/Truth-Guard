@@ -1,21 +1,24 @@
 import React from "react";
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { Moon, Sun } from "lucide-react";
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <nav className="flex justify-between items-center bg-white/70 backdrop-blur-md px-6 py-3 shadow-sm sticky top-0 z-40">
-      <h1 className="text-xl font-semibold">TruthGuard Dashboard</h1>
+    <nav className="flex items-center justify-between p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-900">
+      <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+        TruthGuard
+      </h1>
+
       <button
         onClick={toggleTheme}
-        className="p-2 rounded-lg hover:bg-gray-200 transition"
+        className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:opacity-80 transition"
       >
         {theme === "light" ? (
-          <Moon className="w-5 h-5 text-gray-700" />
+          <Moon size={18} className="text-gray-800" />
         ) : (
-          <Sun className="w-5 h-5 text-yellow-400" />
+          <Sun size={18} className="text-yellow-400" />
         )}
       </button>
     </nav>

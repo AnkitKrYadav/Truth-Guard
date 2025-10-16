@@ -41,7 +41,7 @@ const statsData = [
 
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Trending Topics</h1>
 
       {/* Stats Widgets */}
