@@ -9,7 +9,7 @@ function Verify() {
   // ✅ Dynamic backend URL (auto-switches between local & production)
   const API_BASE_URL =
     process.env.NODE_ENV === "production"
-      ? "https://truthguard-backend.onrender.com" // 🔹 your deployed Flask backend URL
+      ? "https://truth-guard-89p9.onrender.com/" // 🔹 your deployed Flask backend URL
       : "http://localhost:5000"; // 🔹 local backend URL
 
   const handleSubmit = async (e) => {
