@@ -36,7 +36,7 @@ def _compute_confidence(status: str, news_sources: list, fact_checks: list) -> i
 
 
 app = Flask(__name__, static_folder="../Frontend/react-app/build", static_url_path="/")
-CORS(app)  # Allow frontend to call API
+CORS(app, origins=["https://truth-guard-frontend-xu2j.onrender.comm"])  # Allow frontend to call API
 
 # Database path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
