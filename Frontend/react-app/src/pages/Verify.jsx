@@ -15,7 +15,11 @@ function Verify() {
     try {
       const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
       console.log("Using API base:", API_BASE_URL);
-      const res = await axios.post(`${API_BASE_URL}/api/verify`, { claim });
+      const res = await axios.post(
+        `${API_BASE_URL}/api/verify`,
+        { claim },
+        { headers: { "Content-Type": "application/json" }  // explicitly set JSON header
+      });
       // const res = await axios.post("https://truth-guard-89p9.onrender.com/api/verify", { claim });
       setResult(res.data);
     } catch (err) {

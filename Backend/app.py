@@ -35,8 +35,8 @@ def _compute_confidence(status: str, news_sources: list, fact_checks: list) -> i
     return max(0, min(100, score))
 
 
-app = Flask(__name__, static_folder="../Frontend/react-app/build", static_url_path="/")
-CORS(app, origins=["https://truth-guard-frontend-xu2j.onrender.comm"])  # Allow frontend to call API
+app = Flask(__name__)
+CORS(app)  # Allow frontend to call API
 
 # Database path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -111,6 +111,9 @@ def verify_claim_route():
     claim = data.get("claim")
     if not claim:
         return jsonify({"error": "No claim provided"}), 400
+
+    print("Verifying claim with AI:", claim)
+    print(os.getenv("OPENAI_API_KEY"))
 
     if verify_claim_with_ai and os.getenv("OPENAI_API_KEY"):
         try:
