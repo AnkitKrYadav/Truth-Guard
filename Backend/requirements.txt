@@ -1,0 +1,13 @@
+flask==2.2.5
+flask-cors==3.0.10
+requests==2.31.0
+python-dotenv==1.0.0
+openai==1.8.5
+flask
+flask-cors
+requests
+langchain
+openai
+python-dotenv
+pymongo
+newsapi-python
