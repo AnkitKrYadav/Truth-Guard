@@ -144,6 +144,9 @@ def verify_claim_route():
         "sources": sources,
         "confidence": confidence
     })
+@app.route("/healthz")
+def health_check():
+    return "OK", 200
 
 
 # --------- Serve React Frontend ---------
