@@ -1,10 +1,13 @@
-# Minimal backend requirements for Truth-Guard
-# Keep this list small to reduce install time in production.
 flask==2.2.5
 flask-cors==3.0.10
-python-dotenv==1.0.0
 requests==2.31.0
-openai==1.53.0
-gunicorn==21.2.0
-
-# Add test/dev deps to a separate dev requirements file if needed
+python-dotenv==1.0.0
+openai==1.8.5
+flask
+flask-cors
+requests
+langchain
+openai
+python-dotenv
+pymongo
+newsapi-python

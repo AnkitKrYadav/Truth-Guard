@@ -1,6 +1,12 @@
 """
 ai_agent.py
-Clean AI helpers for Truth-Guard with full debug logging.
+
+Clean AI agent helpers for Truth-Guard.
+
+Functions:
+- fetch_news_sources(claim, limit=3): returns list of news source names (uses NewsAPI)
+- fetch_factcheck_claims(claim, limit=3): returns short fact-check texts (uses FactCheck Tools API)
+- verify_claim_with_ai(claim): calls OpenAI to produce a JSON result: {status, summary, sources, confidence}
 """
 
 import os
@@ -14,6 +20,7 @@ try:
 except ImportError:
     openai = None
 
+# Setup logging
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger(__name__)
 
@@ -22,13 +29,13 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 FACTCHECK_API_KEY = os.getenv("FACTCHECK_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-AI_MOCK = os.getenv("AI_MOCK", "False").lower() in ("1", "true", "yes")
 
 if openai and OPENAI_API_KEY:
     openai.api_key = OPENAI_API_KEY
 
 
 def fetch_news_sources(claim: str, limit: int = 3) -> List[str]:
+    """Fetch top news source names related to the claim using NewsAPI."""
     if not NEWS_API_KEY:
         _logger.debug("No NEWS_API_KEY configured; skipping news fetch")
         return []
@@ -46,6 +53,7 @@ def fetch_news_sources(claim: str, limit: int = 3) -> List[str]:
 
 
 def fetch_factcheck_claims(claim: str, limit: int = 3) -> List[str]:
+    """Fetch short fact-check claim texts using Google Fact Check Tools API."""
     if not FACTCHECK_API_KEY:
         _logger.debug("No FACTCHECK_API_KEY configured; skipping factcheck fetch")
         return []
@@ -63,120 +71,108 @@ def fetch_factcheck_claims(claim: str, limit: int = 3) -> List[str]:
 
 
 def _safe_json_parse(text: str) -> Any:
+    """Attempt to parse JSON from text, even if embedded in extra text."""
     text = text.strip()
     try:
         return json.loads(text)
     except Exception:
-        start = text.find("{")
-        end = text.rfind("}")
-        if start != -1 and end != -1 and end > start:
-            snippet = text[start:end + 1]
-            try:
-                return json.loads(snippet)
-            except Exception:
-                pass
+        pass
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        snippet = text[start:end + 1]
+        try:
+            return json.loads(snippet)
+        except Exception:
+            pass
     return None
 
 
-def _compute_confidence(ai_status: str, news_sources: List[str], fact_checks: List[str]) -> int:
-    score = 50
+def _compute_confidence(ai_status: str, news_sources: list, fact_checks: list) -> int:
+    """Compute confidence score from 0 to 100."""
+    score = 50  # default neutral
+
+    # AI signal
     if ai_status == "True":
         score += 30
     elif ai_status == "False":
         score -= 30
 
-    score += min(len(news_sources), 3) * 5
+    # News sources signal
+    score += min(len(news_sources), 3) * 5  # up to +15
+
+    # Fact-check signal
     for fc in fact_checks:
-        fc_lower = (fc or "").lower()
+        fc_lower = fc.lower()
         if "true" in fc_lower or "verified" in fc_lower:
-            score += 20
+            score += 10
         elif "false" in fc_lower or "misleading" in fc_lower:
-            score -= 20
+            score -= 10
+
     return max(0, min(100, score))
 
 
 def verify_claim_with_ai(claim: str) -> Dict[str, Any]:
-    _logger.info("Verifying claim: %s", claim)
-    news = fetch_news_sources(claim, limit=3)
-    facts = fetch_factcheck_claims(claim, limit=3)
-    collected = list(dict.fromkeys([s for s in (news + facts) if s]))
-
-    if AI_MOCK:
-        _logger.info("AI_MOCK enabled — returning mock result")
-        return {
-            "claim": claim,
-            "status": "Unclear",
-            "summary": "Mock mode: no live AI call.",
-            "sources": collected,
-            "confidence": _compute_confidence("Unclear", news, facts),
-        }
-
-    if not openai or not OPENAI_API_KEY:
-        _logger.warning("OpenAI not configured; returning collected evidence only")
-        return {
-            "claim": claim,
-            "status": "Unclear",
-            "summary": "AI not configured. Returning collected sources.",
-            "sources": collected,
-            "confidence": _compute_confidence("Unclear", news, facts),
-        }
-
-    prompt = (
-        "You are TruthGuard, an assistant that verifies short claims.\n"
-        "Provide output as strict JSON with keys: status (True|False|Unclear), summary (1-2 sentences), sources (array).\n"
-        f"CLAIM: {claim}\n"
-    )
-
-    text = ""
-    try:
-        # Modern OpenAI API
-        if hasattr(openai, "chat") and hasattr(openai.chat, "completions"):
-            resp = openai.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=300,
-                temperature=0.2,
-            )
-            choices = getattr(resp, "choices", [])
-            first = choices[0] if choices else {}
-            message = getattr(first, "message", {})
-            text = getattr(message, "content", "") or ""
-        else:
-            # Legacy fallback
-            resp = openai.ChatCompletion.create(
-                model=OPENAI_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=300,
-                temperature=0.2,
-            )
-            choices = getattr(resp, "choices", [])
-            if choices:
-                first = choices[0]
-                message = getattr(first, "message", {})
-                text = getattr(message, "content", "") or ""
-    except Exception as e:
-        _logger.exception("OpenAI request failed: %s", e)
-        return {
-            "claim": claim,
-            "status": "Unclear",
-            "summary": f"AI request failed: {str(e)}",
-            "sources": collected,
-            "confidence": _compute_confidence("Unclear", news, facts),
-        }
-
-    parsed = _safe_json_parse(text)
-    if isinstance(parsed, dict):
-        status = parsed.get("status", "Unclear")
-        summary = parsed.get("summary", text.strip())
-        sources_out = parsed.get("sources", []) or []
-        merged = list(dict.fromkeys(collected + list(sources_out)))
-        confidence = _compute_confidence(status, news, facts)
-        return {"claim": claim, "status": status, "summary": summary, "sources": merged, "confidence": confidence}
-
-    return {
-        "claim": claim,
-        "status": "Unclear",
-        "summary": text.strip(),
-        "sources": collected,
-        "confidence": _compute_confidence("Unclear", news, facts),
+    """
+    Call OpenAI to analyze a claim and return JSON with:
+    {
+        "status": "True" | "False" | "Needs Verification",
+        "summary": "...",
+        "sources": ["source1", ...],
+        "confidence": 0-100
     }
+    """
+    if not OPENAI_API_KEY:
+        return {
+            "status": "Needs Verification",
+            "summary": "No OpenAI API key configured.",
+            "sources": [],
+            "confidence": 50
+        }
+
+    prompt = f"""
+    You are a fact-checking assistant. Analyze the following claim and determine if it is True, False, or Needs Verification.
+    Give a short summary and 1-3 credible sources (if available). Respond only in JSON format:
+
+    {{
+        "status": "True / False / Needs Verification",
+        "summary": "...",
+        "sources": ["source1", "source2"]
+    }}
+
+    Claim: {claim}
+    """
+
+    try:
+        from langchain_openai import ChatOpenAI
+        from langchain.schema import HumanMessage
+
+        llm = ChatOpenAI(api_key=OPENAI_API_KEY, model=OPENAI_MODEL, temperature=0.2)
+        response = llm([HumanMessage(content=prompt)])
+        ai_result = _safe_json_parse(response.content)
+    except Exception as e:
+        _logger.warning("AI verification failed: %s", e)
+        ai_result = None
+
+    if not ai_result:
+        ai_result = {
+            "status": "Needs Verification",
+            "summary": "AI could not parse the response.",
+            "sources": []
+        }
+
+    # Combine with external sources for confidence
+    news_sources = fetch_news_sources(claim)
+    fact_checks = fetch_factcheck_claims(claim)
+    confidence = _compute_confidence(ai_result.get("status", "Needs Verification"), news_sources, fact_checks)
+
+    ai_result["sources"] = list(set(ai_result.get("sources", []) + news_sources + fact_checks))
+    ai_result["confidence"] = confidence
+    return ai_result
+
+
+if __name__ == "__main__":
+    # Quick local test
+    test_claim = "ChatGPT can pass advanced exams"
+    result = verify_claim_with_ai(test_claim)
+    print(json.dumps(result, indent=2))
