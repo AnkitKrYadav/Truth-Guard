@@ -144,10 +144,10 @@ def verify_claim_with_ai(claim: str) -> Dict[str, Any]:
     """
 
     try:
-        from langchain_openai import ChatOpenAI
+        from langchain.chat_models import ChatOpenAI
         from langchain.schema import HumanMessage
 
-        llm = ChatOpenAI(api_key=OPENAI_API_KEY, model=OPENAI_MODEL, temperature=0.2)
+        llm = ChatOpenAI(api_key=OPENAI_API_KEY, model_name=OPENAI_MODEL, temperature=0.2)
         response = llm([HumanMessage(content=prompt)])
         ai_result = _safe_json_parse(response.content)
     except Exception as e:
