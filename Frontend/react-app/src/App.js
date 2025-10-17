@@ -18,7 +18,7 @@ function App() {
   return (
     <ThemeProvider>
       <UserPrefsProvider>
-        <Router>
+        <Router basename={process.env.PUBLIC_URL}>
           <div className="p-6 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex h-screen">
             <Sidebar />
             <div className="flex flex-col flex-grow">

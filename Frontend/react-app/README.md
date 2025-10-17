@@ -82,7 +82,12 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The backend runs on `http://127.0.0.1:5000/`.
+During local development the CRA dev server proxies API calls to `http://127.0.0.1:5000/` (see `package.json`).
+In production, set `REACT_APP_API_BASE` to your backend origin (or leave empty to use same-origin):
+
+```env
+REACT_APP_API_BASE=https://your-backend.example.com
+```
 
 ---
 
@@ -121,6 +126,20 @@ The frontend runs on `http://localhost:3000/` and fetches data from the backend 
 
 * The project can be deployed on **Render**, **Vercel**, or other free hosting platforms.
 * Ensure both frontend and backend are deployed and frontend points to the correct backend URL.
+
+### Production build
+
+When building the frontend for production, set `REACT_APP_API_BASE` to your backend origin so the compiled site will call the correct API. Example (Unix/macOS):
+
+```bash
+REACT_APP_API_BASE=https://your-backend.example.com npm run build
+```
+
+On Windows PowerShell you can set the env var before running the build like:
+
+```powershell
+$env:REACT_APP_API_BASE = 'https://your-backend.example.com'; npm run build
+```
 
 ---
 
