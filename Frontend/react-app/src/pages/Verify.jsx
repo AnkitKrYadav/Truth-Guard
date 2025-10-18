@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { postVerify, API_BASE_URL } from "../utils/api";
 
 function Verify() {
   const [claim, setClaim] = useState("");
@@ -13,14 +13,9 @@ function Verify() {
     setLoading(true);
     setResult(null);
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
-      console.log("Using API base:", API_BASE_URL);
-      const res = await axios.post(
-        `${API_BASE_URL}/api/verify`,
-        { claim },
-        { headers: { "Content-Type": "application/json" }  // explicitly set JSON header
-      });
-      // const res = await axios.post("https://truth-guard-89p9.onrender.com/api/verify", { claim });
+      console.log("Using API base:", API_BASE_URL || "(same origin)");
+
+      const res = await postVerify(claim);
       setResult(res.data);
     } catch (err) {
       console.error(err);

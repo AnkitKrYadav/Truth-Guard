@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import StatsWidget from "../components/StatsWidget";
 import NewsCard from "../components/NewsCard";
-import axios from "axios";
+import client from "../utils/api";
 
 const Dashboard = () => {
   const [trendingNews, setTrendingNews] = useState([]);
@@ -11,8 +11,7 @@ const Dashboard = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch news
-        const resNews = await axios.get("https://truth-guard-89p9.onrender.com/api/trending");
+    const resNews = await client.get("/api/trending");
         setTrendingNews(resNews.data);
 
         // Build stats with real numbers

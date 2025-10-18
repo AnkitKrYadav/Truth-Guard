@@ -6,7 +6,7 @@ Clean AI agent helpers for Truth-Guard.
 Functions:
 - fetch_news_sources(claim, limit=3): returns list of news source names (uses NewsAPI)
 - fetch_factcheck_claims(claim, limit=3): returns short fact-check texts (uses FactCheck Tools API)
-- verify_claim_with_ai(claim): calls OpenAI to produce a JSON result: {status, summary, sources, confidence}
+- verify_claim_with_ai(claim): calls Gemini to produce a JSON result: {status, summary, sources, confidence}
 """
 
 import os
@@ -14,24 +14,26 @@ import json
 import logging
 from typing import List, Dict, Any
 import requests
+from dotenv import load_dotenv
 
 try:
-    import openai
-except ImportError:
-    openai = None
+    import google.generativeai as genai
+except ImportError:  # pragma: no cover - dependency optional at runtime
+    genai = None
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger(__name__)
 
 # Environment variables
+load_dotenv()
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 FACTCHECK_API_KEY = os.getenv("FACTCHECK_API_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
-if openai and OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY
+if genai and GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 
 def fetch_news_sources(claim: str, limit: int = 3) -> List[str]:
@@ -113,26 +115,19 @@ def _compute_confidence(ai_status: str, news_sources: list, fact_checks: list) -
 
 
 def verify_claim_with_ai(claim: str) -> Dict[str, Any]:
-    """
-    Call OpenAI to analyze a claim and return JSON with:
-    {
-        "status": "True" | "False" | "Needs Verification",
-        "summary": "...",
-        "sources": ["source1", ...],
-        "confidence": 0-100
-    }
-    """
-    if not OPENAI_API_KEY:
+    """Call Gemini to analyze a claim and return verification details."""
+    if not genai or not GEMINI_API_KEY:
         return {
             "status": "Needs Verification",
-            "summary": "No OpenAI API key configured.",
+            "summary": "No Gemini API key configured.",
             "sources": [],
-            "confidence": 50
+            "confidence": 50,
+            "claim": claim,
         }
 
     prompt = f"""
     You are a fact-checking assistant. Analyze the following claim and determine if it is True, False, or Needs Verification.
-    Give a short summary and 1-3 credible sources (if available). Respond only in JSON format:
+    Provide a short summary and list 1-3 credible sources if available. Respond only in JSON format:
 
     {{
         "status": "True / False / Needs Verification",
@@ -143,31 +138,47 @@ def verify_claim_with_ai(claim: str) -> Dict[str, Any]:
     Claim: {claim}
     """
 
+    ai_result: Dict[str, Any] | None
     try:
-        from langchain.chat_models import ChatOpenAI
-        from langchain.schema import HumanMessage
+        model = genai.GenerativeModel(GEMINI_MODEL)
+        response = model.generate_content(prompt)
 
-        llm = ChatOpenAI(api_key=OPENAI_API_KEY, model_name=OPENAI_MODEL, temperature=0.2)
-        response = llm([HumanMessage(content=prompt)])
-        ai_result = _safe_json_parse(response.content)
+        response_text = getattr(response, "text", None) or ""
+        if not response_text and getattr(response, "candidates", None):
+            parts = []
+            for candidate in response.candidates:
+                contents = getattr(candidate, "content", None)
+                if not contents:
+                    continue
+                for part in getattr(contents, "parts", []) or []:
+                    part_text = getattr(part, "text", None)
+                    if part_text:
+                        parts.append(part_text)
+            response_text = "\n".join(parts)
+
+        ai_result = _safe_json_parse(response_text) if response_text else None
     except Exception as e:
         _logger.warning("AI verification failed: %s", e)
         ai_result = None
 
-    if not ai_result:
+    if not isinstance(ai_result, dict):
         ai_result = {
             "status": "Needs Verification",
             "summary": "AI could not parse the response.",
-            "sources": []
+            "sources": [],
         }
 
-    # Combine with external sources for confidence
+    ai_status = ai_result.get("status", "Needs Verification")
     news_sources = fetch_news_sources(claim)
     fact_checks = fetch_factcheck_claims(claim)
-    confidence = _compute_confidence(ai_result.get("status", "Needs Verification"), news_sources, fact_checks)
+    confidence = _compute_confidence(ai_status, news_sources, fact_checks)
 
-    ai_result["sources"] = list(set(ai_result.get("sources", []) + news_sources + fact_checks))
+    combined_sources = [s for s in ai_result.get("sources", []) if s]
+    combined_sources.extend(source for source in news_sources if source)
+    combined_sources.extend(fc for fc in fact_checks if fc)
+    ai_result["sources"] = list(dict.fromkeys(combined_sources))
     ai_result["confidence"] = confidence
+    ai_result["claim"] = claim
     return ai_result
 
 

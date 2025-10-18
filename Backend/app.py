@@ -35,11 +35,13 @@ def _compute_confidence(status: str, news_sources: list, fact_checks: list) -> i
     return max(0, min(100, score))
 
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_BUILD_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "Frontend", "react-app", "build"))
+
+app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path="/")
 CORS(app)  # Allow frontend to call API
 
 # Database path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database", "news.db")
 
 # --------- Database Helper ---------
@@ -113,11 +115,11 @@ def verify_claim_route():
         return jsonify({"error": "No claim provided"}), 400
 
     print("Verifying claim with AI:", claim)
-    print(os.getenv("OPENAI_API_KEY"))
 
-    if verify_claim_with_ai and os.getenv("OPENAI_API_KEY"):
+    if verify_claim_with_ai and os.getenv("GEMINI_API_KEY"):
         try:
             ai_result = verify_claim_with_ai(claim)
+            ai_result.setdefault("claim", claim)
             return jsonify(ai_result)
         except Exception as e:
             print("AI agent error:", e)
@@ -153,9 +155,17 @@ def health_check():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, "index.html")
+    static_dir = app.static_folder or ""
+    if not os.path.exists(static_dir):
+        return "Frontend build not found", 404
+
+    requested_path = os.path.join(static_dir, path)
+    if path and os.path.exists(requested_path):
+        return send_from_directory(static_dir, path)
+    index_path = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_path):
+        return send_from_directory(static_dir, "index.html")
+    return "Frontend build not found", 404
 
 # --------- Run Server ---------
 if __name__ == "__main__":
